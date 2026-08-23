@@ -1,0 +1,79 @@
+{
+  "manifest_version": 3,
+  "name": "ShieldFX — AI Behavioral Trading Guard & Revenge Shield",
+  "version": "1.0.0",
+  "description": "Real-time AI behavioral trading copilot that intercepts high-risk revenge trades and enforces cooldowns on Zerodha, Groww, Binance, and other trading platforms.",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "alarms",
+    "notifications"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:8000/*",
+    "http://localhost:8000/*",
+    "*://*.zerodha.com/*",
+    "*://*.groww.in/*",
+    "*://*.binance.com/*",
+    "*://*.angelone.in/*",
+    "*://*.upstox.com/*",
+    "*://*.tradingview.com/*",
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background/service_worker.js"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "ShieldFX Trading Copilot",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.zerodha.com/*",
+        "*://*.groww.in/*",
+        "*://*.binance.com/*",
+        "*://*.angelone.in/*",
+        "*://*.upstox.com/*",
+        "*://*.tradingview.com/*",
+        "http://*/*",
+        "https://*/*",
+        "file://*/*"
+      ],
+      "js": [
+        "content_scripts/broker_adapters.js",
+        "content_scripts/shieldfx_injected.js"
+      ],
+      "css": [
+        "content_scripts/shieldfx_overlay.css"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "icons/*",
+        "content_scripts/shieldfx_overlay.css"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

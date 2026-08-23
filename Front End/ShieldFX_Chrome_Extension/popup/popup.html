@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShieldFX Copilot</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <span class="logo-icon">⚡</span>
+        <div>
+          <h1>SHIELDFX</h1>
+          <span class="subtext">AI Behavioral Trading Guard</span>
+        </div>
+      </div>
+      <div class="health-status" id="backendHealthBadge" title="FastAPI ML Service Health">
+        <span class="dot pulse" id="healthDot"></span>
+        <span id="healthText">Checking...</span>
+      </div>
+    </header>
+
+    <!-- Active Broker Status -->
+    <div class="card platform-card">
+      <div class="card-label">Active Platform</div>
+      <div class="platform-val" id="activePlatformText">Scanning Tab...</div>
+      <div class="guard-pill" id="guardStatusPill">
+        <span class="dot-small"></span> GUARD ACTIVE
+      </div>
+    </div>
+
+    <!-- Session Metrics -->
+    <div class="metrics-grid">
+      <div class="metric-box">
+        <span class="metric-lbl">Blocked (Revenge)</span>
+        <strong class="metric-val danger" id="metricBlocked">0</strong>
+      </div>
+      <div class="metric-box">
+        <span class="metric-lbl">Warned (Tilt)</span>
+        <strong class="metric-val warning" id="metricWarned">0</strong>
+      </div>
+      <div class="metric-box">
+        <span class="metric-lbl">Loss Streak</span>
+        <strong class="metric-val" id="metricStreak">0</strong>
+      </div>
+      <div class="metric-box">
+        <span class="metric-lbl">Safe Orders</span>
+        <strong class="metric-val success" id="metricPassed">0</strong>
+      </div>
+    </div>
+
+    <!-- Quick Action Controls -->
+    <div class="action-section">
+      <button class="btn btn-primary" id="btnTestTilt">
+        <span>🎬 Test Demo Revenge Block</span>
+      </button>
+      
+      <div class="btn-group">
+        <button class="btn btn-secondary" id="btnResetSession">
+          🔄 Reset Session
+        </button>
+        <button class="btn btn-secondary" id="btnOpenOptions">
+          ⚙️ Settings
+        </button>
+      </div>
+
+      <button class="btn btn-outline" id="btnOpenSimulator">
+        🚀 Open ShieldFX Simulator
+      </button>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>ShieldFX ML Copilot v1.0.0</span>
+      <span class="ml-badge">Random Forest Engine</span>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

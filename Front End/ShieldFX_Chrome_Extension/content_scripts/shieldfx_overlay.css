@@ -1,0 +1,328 @@
+/* ─── SHIELDFX INJECTED STYLES & OVERLAYS ─────────────────────────────────── */
+
+/* 1. Full Screen Lockdown Overlay */
+#shieldfx-extension-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(8, 12, 22, 0.92) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  z-index: 2147483647 !important;
+  display: none;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace !important;
+  color: #f1f5f9 !important;
+  margin: 0 !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+  animation: sfxFadeIn 0.3s ease-out !important;
+}
+
+@keyframes sfxFadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.sfx-lock-card {
+  background: #0f172a !important;
+  border: 2px solid #ef4444 !important;
+  border-radius: 20px !important;
+  box-shadow: 0 0 70px rgba(239, 68, 68, 0.45), 0 20px 40px rgba(0, 0, 0, 0.8) !important;
+  width: 100% !important;
+  max-width: 520px !important;
+  padding: 36px 32px !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+}
+
+.sfx-badge-danger {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background: #450a0a !important;
+  border: 1px solid #dc2626 !important;
+  color: #fca5a5 !important;
+  padding: 6px 14px !important;
+  border-radius: 30px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.2px !important;
+  text-transform: uppercase !important;
+  margin-bottom: 16px !important;
+}
+
+.sfx-lock-title {
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  color: #f87171 !important;
+  margin: 0 0 10px 0 !important;
+  letter-spacing: 0.5px !important;
+  line-height: 1.3 !important;
+}
+
+.sfx-lock-subtitle {
+  font-size: 13px !important;
+  color: #94a3b8 !important;
+  margin: 0 0 20px 0 !important;
+  line-height: 1.5 !important;
+}
+
+.sfx-countdown-box {
+  background: #090d16 !important;
+  border: 1px solid #1e293b !important;
+  border-radius: 14px !important;
+  padding: 20px !important;
+  margin-bottom: 20px !important;
+}
+
+.sfx-countdown-digits {
+  font-size: 54px !important;
+  font-weight: 900 !important;
+  color: #ef4444 !important;
+  font-family: ui-monospace, "Cascadia Code", monospace !important;
+  letter-spacing: 2px !important;
+  margin: 0 !important;
+  text-shadow: 0 0 25px rgba(239, 68, 68, 0.4) !important;
+}
+
+.sfx-countdown-label {
+  font-size: 11px !important;
+  color: #64748b !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  margin-top: 6px !important;
+}
+
+.sfx-triggers-panel {
+  background: #1e1b2e !important;
+  border: 1px solid #7f1d1d !important;
+  border-radius: 10px !important;
+  padding: 14px 16px !important;
+  text-align: left !important;
+  margin-bottom: 20px !important;
+}
+
+.sfx-triggers-header {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #f87171 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.8px !important;
+  margin-bottom: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.sfx-triggers-list {
+  margin: 0 !important;
+  padding-left: 18px !important;
+  color: #fecaca !important;
+  font-size: 12px !important;
+  line-height: 1.6 !important;
+}
+
+.sfx-lock-footer {
+  font-size: 11px !important;
+  color: #64748b !important;
+  line-height: 1.4 !important;
+}
+
+/* 2. Floating In-Page ShieldFX HUD Widget */
+#shieldfx-floating-hud {
+  position: fixed !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  z-index: 2147483640 !important;
+  background: #0f172a !important;
+  border: 1px solid #1e293b !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(56, 189, 248, 0.15) !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace !important;
+  color: #e2e8f0 !important;
+  min-width: 250px !important;
+  overflow: hidden !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  user-select: none !important;
+}
+
+#shieldfx-floating-hud.sfx-collapsed {
+  min-width: unset !important;
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.sfx-hud-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 10px 14px !important;
+  background: #090d16 !important;
+  border-bottom: 1px solid #1e293b !important;
+  cursor: grab !important;
+}
+
+.sfx-hud-brand {
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  color: #38bdf8 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  letter-spacing: 0.5px !important;
+}
+
+.sfx-hud-toggle {
+  background: transparent !important;
+  border: none !important;
+  color: #64748b !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+  padding: 2px 4px !important;
+  border-radius: 4px !important;
+}
+.sfx-hud-toggle:hover {
+  color: #94a3b8 !important;
+  background: #1e293b !important;
+}
+
+.sfx-hud-body {
+  padding: 12px 14px !important;
+}
+
+.sfx-hud-risk-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: baseline !important;
+  margin-bottom: 6px !important;
+}
+
+.sfx-hud-risk-label {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #94a3b8 !important;
+  text-transform: uppercase !important;
+}
+
+.sfx-hud-risk-score {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  font-family: monospace !important;
+  color: #4ade80 !important;
+}
+
+.sfx-meter-bar-bg {
+  width: 100% !important;
+  height: 6px !important;
+  background: #1e293b !important;
+  border-radius: 3px !important;
+  overflow: hidden !important;
+  margin-bottom: 10px !important;
+}
+
+.sfx-meter-bar-fill {
+  width: 12% !important;
+  height: 100% !important;
+  background: #4ade80 !important;
+  transition: width 0.3s ease, background-color 0.3s ease !important;
+}
+
+.sfx-hud-stats {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 8px !important;
+  margin-bottom: 10px !important;
+  font-size: 10px !important;
+}
+
+.sfx-hud-stat-box {
+  background: #090d16 !important;
+  border: 1px solid #1e293b !important;
+  border-radius: 6px !important;
+  padding: 6px 8px !important;
+}
+
+.sfx-stat-lbl {
+  color: #64748b !important;
+  display: block !important;
+}
+
+.sfx-stat-val {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: #f1f5f9 !important;
+  margin-top: 2px !important;
+}
+
+.sfx-hud-actions {
+  display: flex !important;
+  gap: 6px !important;
+}
+
+.sfx-mini-btn {
+  flex: 1 !important;
+  padding: 5px 8px !important;
+  border: 1px solid #334155 !important;
+  border-radius: 4px !important;
+  background: #1e293b !important;
+  color: #cbd5e1 !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  text-align: center !important;
+  transition: all 0.15s !important;
+}
+.sfx-mini-btn:hover {
+  background: #334155 !important;
+  color: #f8fafc !important;
+}
+.sfx-btn-loss {
+  border-color: #7f1d1d !important;
+  color: #fca5a5 !important;
+}
+.sfx-btn-loss:hover {
+  background: #450a0a !important;
+}
+
+/* 3. In-Page Advisory Toast */
+#shieldfx-toast {
+  position: fixed !important;
+  top: 24px !important;
+  right: 24px !important;
+  z-index: 2147483645 !important;
+  background: #451a03 !important;
+  border: 1px solid #f59e0b !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+  color: #fef3c7 !important;
+  padding: 12px 18px !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace !important;
+  font-size: 12px !important;
+  max-width: 400px !important;
+  display: none;
+  animation: sfxToastIn 0.3s ease !important;
+}
+
+@keyframes sfxToastIn {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sfx-pulse-dot {
+  width: 8px !important;
+  height: 8px !important;
+  background: #4ade80 !important;
+  border-radius: 50% !important;
+  box-shadow: 0 0 8px #4ade80 !important;
+  display: inline-block !important;
+}

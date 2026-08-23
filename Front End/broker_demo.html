@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Broker Terminal Mock (Zerodha Kite / Groww / Binance) — ShieldFX Testbench</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #080c14;
+    color: #e2e8f0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ─── TOP NAVIGATION & INDICES BAR ─────────────────────────────────────── */
+  .navbar {
+    background: #0f172a;
+    border-bottom: 1px solid #1e293b;
+    padding: 8px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  .nav-left { display: flex; align-items: center; gap: 20px; }
+  
+  .broker-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: #ff5722;
+  }
+  .broker-brand.groww { color: #00d09c; }
+  .broker-brand.binance { color: #f0b90b; }
+
+  .indices-strip {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    border-left: 1px solid #1e293b;
+    padding-left: 18px;
+  }
+  .index-item { display: flex; align-items: baseline; gap: 6px; font-size: 12px; }
+  .index-name { color: #94a3b8; font-weight: 600; font-size: 11px; }
+  .index-val { font-family: monospace; font-weight: 700; color: #f8fafc; }
+  .index-chg { font-size: 11px; font-weight: 600; font-family: monospace; }
+  .pos { color: #22c55e; }
+  .neg { color: #ef4444; }
+
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+  .broker-selector {
+    display: flex;
+    background: #1e293b;
+    border-radius: 6px;
+    padding: 2px;
+    border: 1px solid #334155;
+  }
+  .broker-tab-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .broker-tab-btn.active {
+    background: #0f172a;
+    color: #38bdf8;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  }
+
+  .user-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #1e293b;
+    border: 1px solid #334155;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #cbd5e1;
+  }
+  .pulse-dot {
+    width: 6px;
+    height: 6px;
+    background: #22c55e;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #22c55e;
+  }
+
+  /* ─── BANNER / EXTENSION TEST GUIDE ────────────────────────────────────── */
+  .guide-banner {
+    background: linear-gradient(90deg, #1e1b4b 0%, #0f172a 100%);
+    border-bottom: 1px solid #312e81;
+    padding: 8px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #c7d2fe;
+    flex-shrink: 0;
+  }
+  .guide-banner strong { color: #818cf8; }
+  .btn-demo-seq {
+    background: #4f46e5;
+    color: #fff;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 5px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s;
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.4);
+  }
+  .btn-demo-seq:hover { background: #4338ca; }
+
+  /* ─── MAIN WORKSPACE GRID ──────────────────────────────────────────────── */
+  .workspace {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* ─── LEFT: WATCHLIST ──────────────────────────────────────────────────── */
+  .watchlist-panel {
+    background: #0b0f19;
+    border-right: 1px solid #1e293b;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .search-box-wrap {
+    padding: 10px 12px;
+    border-bottom: 1px solid #1e293b;
+  }
+  .search-box {
+    width: 100%;
+    background: #111827;
+    border: 1px solid #1f2937;
+    color: #f1f5f9;
+    padding: 7px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    outline: none;
+  }
+  .search-box:focus { border-color: #38bdf8; }
+
+  .watchlist-tabs {
+    display: flex;
+    border-bottom: 1px solid #1e293b;
+    background: #080c14;
+  }
+  .wl-tab {
+    flex: 1;
+    text-align: center;
+    padding: 7px 0;
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+  .wl-tab.active {
+    color: #38bdf8;
+    border-bottom-color: #38bdf8;
+    background: #0f172a;
+  }
+
+  .watchlist-items {
+    flex: 1;
+    overflow-y: auto;
+  }
+  .wl-item {
+    padding: 10px 14px;
+    border-bottom: 1px solid #151d2c;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.15s;
+  }
+  .wl-item:hover, .wl-item.selected {
+    background: #111827;
+  }
+  .wl-item.selected::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: #38bdf8;
+  }
+  .wl-sym-title { font-weight: 700; color: #f8fafc; font-size: 12px; }
+  .wl-sym-sub { font-size: 10px; color: #64748b; margin-top: 2px; }
+  .wl-price-col { text-align: right; }
+  .wl-ltp { font-family: monospace; font-weight: 700; font-size: 13px; }
+  .wl-chg { font-size: 10px; font-family: monospace; }
+
+  .wl-actions {
+    display: none;
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    gap: 4px;
+    background: #111827;
+    padding: 2px;
+  }
+  .wl-item:hover .wl-actions { display: flex; }
+  .wl-btn-mini {
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 800;
+    border: none;
+    cursor: pointer;
+  }
+  .wl-buy { background: #22c55e; color: #000; }
+  .wl-sell { background: #ef4444; color: #fff; }
+
+  /* ─── RIGHT: TRADING & CHART DASHBOARD ─────────────────────────────────── */
+  .trading-workspace {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    background: #080c14;
+    padding: 14px 18px;
+    gap: 14px;
+  }
+
+  /* ─── TOP CHART PANEL ──────────────────────────────────────────────────── */
+  .chart-card {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 12px 16px;
+  }
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .chart-title-area {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .chart-instrument-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #f8fafc;
+  }
+  .chart-live-ltp {
+    font-size: 18px;
+    font-weight: 800;
+    font-family: monospace;
+    color: #22c55e;
+  }
+  .chart-chg-badge {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .chart-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .chart-pill {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #94a3b8;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .chart-pill.active { background: #38bdf8; color: #000; border-color: #38bdf8; }
+
+  #brokerChartCanvas {
+    width: 100%;
+    height: 170px;
+    background: #080d16;
+    border: 1px solid #1e293b;
+    border-radius: 6px;
+    display: block;
+  }
+
+  /* ─── BOTTOM SPLIT: ORDER PAD & POSITIONS ──────────────────────────────── */
+  .bottom-split {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 14px;
+  }
+
+  /* Order Window (Kite Style) */
+  .order-window {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+  .order-window h3 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #94a3b8;
+    margin-bottom: 12px;
+  }
+  .order-type-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .ot-tab {
+    flex: 1;
+    text-align: center;
+    padding: 5px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    background: #1e293b;
+    color: #94a3b8;
+    cursor: pointer;
+  }
+  .ot-tab.active {
+    background: #0284c7;
+    color: #fff;
+  }
+
+  .form-group { margin-bottom: 10px; }
+  .form-group label { display: block; font-size: 10px; color: #94a3b8; margin-bottom: 4px; font-weight: 600; text-transform: uppercase; }
+  .form-group input, .form-group select {
+    width: 100%;
+    background: #080d16;
+    border: 1px solid #334155;
+    color: #f8fafc;
+    padding: 7px 10px;
+    border-radius: 5px;
+    font-size: 13px;
+    font-family: monospace;
+    outline: none;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: #38bdf8; }
+
+  .order-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .btn-buy, .btn-sell {
+    padding: 11px;
+    border: none;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.15s;
+  }
+  .btn-buy { background: #16a34a; color: #fff; box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3); }
+  .btn-sell { background: #dc2626; color: #fff; box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3); }
+  .btn-buy:hover { background: #15803d; }
+  .btn-sell:hover { background: #b91c1c; }
+
+  /* Positions / Execution Ledger */
+  .ledger-card {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+  }
+  .ledger-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .ledger-header h3 {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #94a3b8;
+    letter-spacing: 0.5px;
+  }
+  .btn-clear-ledger {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #94a3b8;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-clear-ledger:hover { background: #334155; color: #f1f5f9; }
+
+  .table-wrap {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 220px;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { text-align: left; padding: 7px 10px; color: #64748b; border-bottom: 1px solid #1e293b; font-size: 10px; text-transform: uppercase; font-weight: 700; }
+  td { padding: 8px 10px; border-bottom: 1px solid #151d2c; font-family: monospace; }
+  .row-blocked { background: rgba(239, 68, 68, 0.12); border-left: 3px solid #ef4444; }
+
+  /* Demo Step Status Box */
+  #demoStatusBox {
+    background: #1e1b4b;
+    border: 1px solid #6366f1;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    display: none;
+    font-size: 11px;
+    line-height: 1.5;
+    color: #c7d2fe;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* Standalone ShieldFX Intercept Modal */
+  #shieldfx-mock-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+  }
+  .shieldfx-modal {
+    width: 440px;
+    padding: 28px;
+    text-align: center;
+    border-radius: 14px;
+    background: #0f172a;
+    border: 2px solid #ef4444;
+    box-shadow: 0 0 45px rgba(239, 68, 68, 0.4);
+  }
+  .shieldfx-modal h2 { color: #ef4444; font-size: 17px; margin-bottom: 8px; font-weight: 800; }
+  .shieldfx-modal p { color: #cbd5e1; margin: 6px 0; font-size: 12px; line-height: 1.5; }
+  #shieldfx-countdown { font-size: 42px; font-weight: 900; margin: 14px 0; color: #f87171; font-family: monospace; }
+</style>
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <div class="navbar">
+    <div class="nav-left">
+      <div class="broker-brand" id="brokerLogo">⚡ ZERODHA KITE</div>
+      <div class="indices-strip">
+        <div class="index-item">
+          <span class="index-name">NIFTY 50</span>
+          <span class="index-val" id="topNiftyVal">24,350.20</span>
+          <span class="index-chg pos" id="topNiftyChg">+84.10 (+0.35%)</span>
+        </div>
+        <div class="index-item">
+          <span class="index-name">SENSEX</span>
+          <span class="index-val">79,890.40</span>
+          <span class="index-chg pos">+245.80 (+0.31%)</span>
+        </div>
+        <div class="index-item">
+          <span class="index-name">BANKNIFTY</span>
+          <span class="index-val">52,140.80</span>
+          <span class="index-chg neg">-110.20 (-0.21%)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <div class="broker-selector">
+        <button class="broker-tab-btn active" onclick="switchBrokerMode('zerodha')">Kite</button>
+        <button class="broker-tab-btn" onclick="switchBrokerMode('groww')">Groww</button>
+        <button class="broker-tab-btn" onclick="switchBrokerMode('binance')">Binance</button>
+      </div>
+      <div class="user-badge">
+        <div class="pulse-dot"></div>
+        <span>DEMO_TRADER_101</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ShieldFX Guide Banner -->
+  <div class="guide-banner">
+    <div>
+      🛡️ <strong>ShieldFX Broker Interceptor Testbench:</strong> Matches Zerodha Kite, Groww &amp; Binance DOM elements. Test manual orders or run automated revenge escalation.
+    </div>
+    <button class="btn-demo-seq" id="btnRunFullSequence">
+      🎬 Run 3-Step Tilt Sequence Until Blocked
+    </button>
+  </div>
+
+  <!-- Workspace Grid -->
+  <div class="workspace">
+
+    <!-- Watchlist -->
+    <div class="watchlist-panel">
+      <div class="search-box-wrap">
+        <input type="text" class="search-box" placeholder="🔍 Search eg: infy, nifty, weekly ce..." />
+      </div>
+      <div class="watchlist-tabs">
+        <div class="wl-tab active">Watchlist 1</div>
+        <div class="wl-tab">F&amp;O</div>
+        <div class="wl-tab">Indices</div>
+        <div class="wl-tab">Crypto</div>
+      </div>
+      <div class="watchlist-items" id="watchlistContainer">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+
+    <!-- Trading & Chart Dashboard -->
+    <div class="trading-workspace">
+
+      <!-- Live Candlestick & Volume Chart -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title-area">
+            <span class="chart-instrument-title" id="activeSymbolTitle">NIFTY 24350 CE</span>
+            <span class="chart-live-ltp" id="activeSymbolLtp">₹142.50</span>
+            <span class="chart-chg-badge" id="activeSymbolChg">+4.2%</span>
+          </div>
+          <div class="chart-controls">
+            <span class="chart-pill active">1m</span>
+            <span class="chart-pill">5m</span>
+            <span class="chart-pill">15m</span>
+            <span class="chart-pill" style="color:#00e5ff">EMA 9</span>
+            <span class="chart-pill" style="color:#ffb300">EMA 21</span>
+            <span class="chart-pill" style="color:#4ade80">Volume</span>
+          </div>
+        </div>
+        <canvas id="brokerChartCanvas"></canvas>
+      </div>
+
+      <!-- Bottom Split: Order Window & Ledger -->
+      <div class="bottom-split">
+
+        <!-- Order Window (Kite / Groww / Binance compatible) -->
+        <div class="order-window">
+          <div id="demoStatusBox"></div>
+
+          <h3>Order Execution Pad</h3>
+          <div class="order-type-tabs">
+            <div class="ot-tab active" onclick="setOrderTab('MIS')">Intraday (MIS)</div>
+            <div class="ot-tab" onclick="setOrderTab('CNC')">Overnight (CNC)</div>
+            <div class="ot-tab" onclick="setOrderTab('COVER')">Cover (CO)</div>
+          </div>
+
+          <div class="form-group">
+            <label>Quantity / Lots (50 Qty = 1 Lot)</label>
+            <input type="number" id="orderQty" value="1" min="1" data-balloon="Quantity" label="Qty." />
+          </div>
+
+          <div class="form-group">
+            <label>Order Price (₹)</label>
+            <input type="number" id="orderPrice" value="142.50" step="0.05" />
+          </div>
+
+          <div class="form-group">
+            <label>Product &amp; Hedge Mode</label>
+            <select id="brokerHedgeSelect">
+              <option value="naked">Naked Exposure (Directional)</option>
+              <option value="spread">Hedged Spread</option>
+            </select>
+          </div>
+
+          <div class="order-actions">
+            <button class="btn-buy" id="brokerBuyBtn">▲ BUY (Long)</button>
+            <button class="btn-sell" id="brokerSellBtn">▼ SELL (Short)</button>
+          </div>
+        </div>
+
+        <!-- Ledger & Positions -->
+        <div class="ledger-card">
+          <div class="ledger-header">
+            <h3>Executed Positions &amp; Ledger</h3>
+            <button class="btn-clear-ledger" onclick="clearLedger()">🔄 Reset Ledger</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Time</th>
+                  <th>Instrument</th>
+                  <th>Side</th>
+                  <th>Lots</th>
+                  <th>Price</th>
+                  <th>P&amp;L</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="positionsTableBody">
+                <tr>
+                  <td colspan="8" style="text-align:center; color:#64748b; padding:28px;">
+                    No trades executed yet. Click BUY / SELL or run the automated 3-step sequence.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Standalone Cooldown Modal (Fall-through if extension is not injected) -->
+  <div id="shieldfx-mock-overlay">
+    <div class="shieldfx-modal">
+      <h2>🚨 REVENGE TRADE INTERCEPTED</h2>
+      <p>ShieldFX ML Guard flagged abnormal position escalation following consecutive drawdowns.</p>
+      <div id="shieldfx-mock-reasons" style="color: #fca5a5; font-size: 11px; margin: 12px 0; text-align: left; background: #1e293b; padding: 10px 14px; border-radius: 6px; line-height: 1.6;">
+        • Rapid turnaround: &lt; 3.0s after loss<br/>
+        • Lot size escalated by 2.0x<br/>
+        • Loss streak count: 2
+      </div>
+      <p>Broker order execution is temporarily locked.</p>
+      <div id="shieldfx-countdown">01:00</div>
+      <p>Take a 60-second cooldown to protect trading capital.</p>
+    </div>
+  </div>
+
+<script>
+  // ─── WATCHLIST DATA ──────────────────────────────────────────────────────────
+  const watchlist = [
+    { sym: 'NIFTY 24350 CE', exch: 'NFO', price: 142.50, chg: '+4.20 (+3.0%)', isPos: true },
+    { sym: 'BANKNIFTY 52000 PE', exch: 'NFO', price: 285.00, chg: '-12.40 (-4.1%)', isPos: false },
+    { sym: 'RELIANCE', exch: 'NSE', price: 2980.50, chg: '+14.20 (+0.5%)', isPos: true },
+    { sym: 'HDFCBANK', exch: 'NSE', price: 1642.00, chg: '-6.80 (-0.4%)', isPos: false },
+    { sym: 'TCS', exch: 'NSE', price: 3890.00, chg: '+22.50 (+0.6%)', isPos: true },
+    { sym: 'BTC/USDT', exch: 'BINANCE', price: 63450.00, chg: '+1240.00 (+1.9%)', isPos: true }
+  ];
+
+  let activeSym = watchlist[0];
+  let tradeCount = 0;
+  let executedTrades = [];
+  let lossStreak = 0;
+  let lastTradeTime = null;
+  let lastLotSize = 1;
+
+  function renderWatchlist() {
+    const container = document.getElementById('watchlistContainer');
+    container.innerHTML = '';
+    watchlist.forEach(item => {
+      const isSel = item.sym === activeSym.sym;
+      const div = document.createElement('div');
+      div.className = `wl-item ${isSel ? 'selected' : ''}`;
+      div.onclick = () => selectSymbol(item);
+      div.innerHTML = `
+        <div>
+          <div class="wl-sym-title">${item.sym}</div>
+          <div class="wl-sym-sub">${item.exch}</div>
+        </div>
+        <div class="wl-price-col">
+          <div class="wl-ltp ${item.isPos ? 'pos' : 'neg'}">₹${item.price.toFixed(2)}</div>
+          <div class="wl-chg ${item.isPos ? 'pos' : 'neg'}">${item.chg}</div>
+        </div>
+        <div class="wl-actions">
+          <button class="wl-btn-mini wl-buy" onclick="event.stopPropagation(); quickOrder('${item.sym}', 'BUY')">B</button>
+          <button class="wl-btn-mini wl-sell" onclick="event.stopPropagation(); quickOrder('${item.sym}', 'SELL')">S</button>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  function selectSymbol(item) {
+    activeSym = item;
+    document.getElementById('activeSymbolTitle').textContent = item.sym;
+    document.getElementById('activeSymbolLtp').textContent = `₹${item.price.toFixed(2)}`;
+    document.getElementById('orderPrice').value = item.price.toFixed(2);
+    renderWatchlist();
+    initChart();
+  }
+
+  function quickOrder(sym, side) {
+    const target = watchlist.find(w => w.sym === sym);
+    if (target) selectSymbol(target);
+    if (side === 'BUY') document.getElementById('brokerBuyBtn').click();
+    else document.getElementById('brokerSellBtn').click();
+  }
+
+  // ─── BROKER MODE SWITCHER ───────────────────────────────────────────────────
+  function switchBrokerMode(mode) {
+    document.querySelectorAll('.broker-tab-btn').forEach(b => b.classList.remove('active'));
+    const logo = document.getElementById('brokerLogo');
+    if (mode === 'zerodha') {
+      logo.className = 'broker-brand';
+      logo.textContent = '⚡ ZERODHA KITE';
+    } else if (mode === 'groww') {
+      logo.className = 'broker-brand groww';
+      logo.textContent = '🌱 GROWW PRO';
+    } else if (mode === 'binance') {
+      logo.className = 'broker-brand binance';
+      logo.textContent = '🟡 BINANCE FUTURES';
+    }
+    const clickedBtn = Array.from(document.querySelectorAll('.broker-tab-btn')).find(b => b.textContent.toLowerCase().includes(mode.slice(0,3)));
+    if (clickedBtn) clickedBtn.classList.add('active');
+  }
+
+  function setOrderTab(tab) {
+    document.querySelectorAll('.ot-tab').forEach(t => t.classList.remove('active'));
+    const active = Array.from(document.querySelectorAll('.ot-tab')).find(t => t.textContent.includes(tab));
+    if (active) active.classList.add('active');
+  }
+
+  // ─── LIVE CANDLESTICK CHART ─────────────────────────────────────────────────
+  let candles = [];
+  function initChart() {
+    candles = [];
+    let base = activeSym.price;
+    for (let i = 0; i < 28; i++) {
+      const move = (Math.random() - 0.48) * (base * 0.008);
+      const open = base;
+      const close = base + move;
+      const high = Math.max(open, close) + Math.random() * (base * 0.004);
+      const low = Math.min(open, close) - Math.random() * (base * 0.004);
+      const volume = Math.floor(Math.random() * 5000) + 2000;
+      candles.push({ open, high, low, close, volume });
+      base = close;
+    }
+    drawChart();
+  }
+
+  function drawChart() {
+    const canvas = document.getElementById('brokerChartCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const dpr = window.devicePixelRatio || 1;
+    const displayWidth = canvas.parentElement.clientWidth - 32;
+    const displayHeight = 170;
+
+    canvas.width = displayWidth * dpr;
+    canvas.height = displayHeight * dpr;
+    canvas.style.width = displayWidth + 'px';
+    canvas.style.height = displayHeight + 'px';
+    ctx.scale(dpr, dpr);
+
+    const w = displayWidth;
+    const h = displayHeight;
+    const rightGutter = 55;
+    const chartW = w - rightGutter;
+    const volH = 30;
+    const priceH = h - volH - 10;
+
+    ctx.clearRect(0, 0, w, h);
+    if (candles.length === 0) return;
+
+    let minP = Math.min(...candles.map(c => c.low));
+    let maxP = Math.max(...candles.map(c => c.high));
+    const pad = (maxP - minP) * 0.1 || 2;
+    minP -= pad;
+    maxP += pad;
+    const range = (maxP - minP) || 1;
+
+    // Grid
+    ctx.strokeStyle = '#151d2c';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2, 2]);
+    ctx.fillStyle = '#64748b';
+    ctx.font = '9px monospace';
+
+    for (let i = 1; i <= 3; i++) {
+      const y = (priceH / 4) * i + 6;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(chartW, y);
+      ctx.stroke();
+
+      const priceAtY = maxP - ((y - 6) / priceH) * range;
+      ctx.fillText(priceAtY.toFixed(2), chartW + 5, y + 3);
+    }
+    ctx.setLineDash([]);
+
+    // Separator
+    ctx.strokeStyle = '#1e293b';
+    ctx.beginPath();
+    ctx.moveTo(chartW, 0);
+    ctx.lineTo(chartW, h);
+    ctx.stroke();
+
+    const slotW = chartW / candles.length;
+    const bodyW = Math.max(slotW * 0.65, 3);
+    const getY = (val) => 6 + priceH - ((val - minP) / range) * priceH;
+
+    const maxVol = Math.max(...candles.map(c => c.volume));
+    const volBase = h - 4;
+
+    candles.forEach((c, i) => {
+      const isBull = c.close >= c.open;
+      const col = isBull ? '#22c55e' : '#ef4444';
+      const x = i * slotW + slotW / 2;
+
+      // Volume bar
+      const barH = (c.volume / maxVol) * (volH - 6);
+      ctx.fillStyle = isBull ? 'rgba(34, 197, 94, 0.25)' : 'rgba(239, 68, 68, 0.25)';
+      ctx.fillRect(x - bodyW / 2, volBase - barH, bodyW, barH);
+
+      // Candlestick Wick
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(x, getY(c.high));
+      ctx.lineTo(x, getY(c.low));
+      ctx.stroke();
+
+      // Candlestick Body
+      const top = Math.min(getY(c.open), getY(c.close));
+      const bh = Math.max(Math.abs(getY(c.close) - getY(c.open)), 2);
+      ctx.fillStyle = col;
+      ctx.fillRect(x - bodyW / 2, top, bodyW, bh);
+    });
+
+    // Real-Time LTP Line
+    const curP = candles[candles.length - 1].close;
+    const curY = getY(curP);
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2, 2]);
+    ctx.beginPath();
+    ctx.moveTo(0, curY);
+    ctx.lineTo(chartW, curY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillRect(chartW + 2, curY - 7, rightGutter - 4, 14);
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 9px monospace';
+    ctx.fillText(curP.toFixed(1), chartW + 5, curY + 3);
+  }
+
+  
+    // ─── ORDER EXECUTION & SHIELDFX INTERCEPTION ────────────────────────────────
+  let cooldownActive = false;
+  let cooldownTimer = null;
+
+  function triggerStandaloneBlock(customRemaining = null) {
+    cooldownActive = true;
+    const overlay = document.getElementById("shieldfx-mock-overlay");
+    const countEl = document.getElementById("shieldfx-countdown");
+    overlay.style.display = "flex";
+
+    const duration = customRemaining !== null ? customRemaining : 60;
+    const unlockAt = Date.now() + (duration * 1000);
+
+    // 🔒 Save unlock timestamp to localStorage
+    localStorage.setItem("broker_demo_cooldown_until", unlockAt.toString());
+
+    function updateCountdown() {
+      const savedUntil = parseInt(localStorage.getItem("broker_demo_cooldown_until") || "0", 10);
+      const rem = Math.max(0, Math.ceil((savedUntil - Date.now()) / 1000));
+
+      const m = String(Math.floor(rem / 60)).padStart(2, "0");
+      const s = String(rem % 60).padStart(2, "0");
+      countEl.textContent = `${m}:${s}`;
+
+      if (rem <= 0) {
+        clearInterval(cooldownTimer);
+        cooldownActive = false;
+        overlay.style.display = "none";
+        localStorage.removeItem("broker_demo_cooldown_until");
+        console.log("✅ Cooldown complete — trading unlocked");
+      }
+    }
+
+    if (cooldownTimer) clearInterval(cooldownTimer);
+    updateCountdown();
+    cooldownTimer = setInterval(updateCountdown, 1000);
+  }
+
+  
+
+  function recordOrder(dir) {
+    if (cooldownActive) {
+      console.warn("⏳ ShieldFX Cooldown Active — Order Blocked.");
+      return;
+    }
+
+    const now = Date.now();
+    const qty = parseInt(document.getElementById("orderQty").value) || 1;
+    const price = parseFloat(document.getElementById("orderPrice").value) || activeSym.price;
+    const timeDelta = lastTradeTime ? ((now - lastTradeTime) / 1000).toFixed(1) : 300;
+    const multiplier = (qty / lastLotSize).toFixed(1);
+
+    // Standalone Revenge Trade Heuristic Check (if extension is not running)
+    const isRevenge = lossStreak >= 2 && timeDelta < 4.0 && multiplier >= 2.0;
+
+    tradeCount++;
+    const tbody = document.getElementById("positionsTableBody");
+    if (tradeCount === 1) tbody.innerHTML = "";
+
+    if (isRevenge) {
+      // Hard block row
+      const tr = document.createElement("tr");
+      tr.className = "row-blocked";
+      tr.innerHTML = `
+        <td>${tradeCount}</td>
+        <td>${new Date().toTimeString().slice(0,8)}</td>
+        <td><strong style="color:#ef4444">${activeSym.sym}</strong></td>
+        <td style="color:${dir==='BUY'?'#22c55e':'#ef4444'};font-weight:700;">${dir}</td>
+        <td>${qty} Lots</td>
+        <td>₹${price.toFixed(2)}</td>
+        <td style="color:#ef4444;font-weight:700;">₹0.00 (Protected)</td>
+        <td style="color:#ef4444;font-weight:800;">🚨 BLOCKED BY ML</td>
+      `;
+      tbody.prepend(tr);
+      triggerStandaloneBlock();
+      return;
+    }
+
+    // Normal trade execution
+    lossStreak++;
+    lastTradeTime = now;
+    lastLotSize = qty;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${tradeCount}</td>
+      <td>${new Date().toTimeString().slice(0,8)}</td>
+      <td><strong>${activeSym.sym}</strong></td>
+      <td style="color:${dir==='BUY'?'#22c55e':'#ef4444'};font-weight:700;">${dir}</td>
+      <td>${qty} Lots</td>
+      <td>₹${price.toFixed(2)}</td>
+      <td style="color:#ef4444; font-weight:700;">-₹${(qty * 450).toFixed(2)}</td>
+      <td style="color:#22c55e; font-weight:700;">FILLED</td>
+    `;
+    tbody.prepend(tr);
+  }
+
+  function clearLedger() {
+    tradeCount = 0;
+    lossStreak = 0;
+    lastTradeTime = null;
+    lastLotSize = 1;
+    // Clear persistent cooldown on reset
+    if (cooldownActive) {
+      if (cooldownTimer) clearInterval(cooldownTimer);
+      cooldownActive = false;
+      document.getElementById("shieldfx-mock-overlay").style.display = "none";
+    }
+    localStorage.removeItem("broker_demo_cooldown_until");
+
+    document.getElementById("positionsTableBody").innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align:center; color:#64748b; padding:28px;">
+          Ledger reset. Click BUY / SELL or run the automated 3-step sequence.
+        </td>
+      </tr>
+    `;
+  }
+
+  document.getElementById("brokerBuyBtn").addEventListener("click", () => recordOrder("BUY"));
+  document.getElementById("brokerSellBtn").addEventListener("click", () => recordOrder("SELL"));
+
+  // ─── 3-STEP AUTOMATED DEMO SEQUENCE ─────────────────────────────────────────
+  const statusBox = document.getElementById("demoStatusBox");
+  let demoTimer = null;
+
+  function updateStatus(html) {
+    statusBox.style.display = "block";
+    statusBox.innerHTML = html;
+  }
+
+  document.getElementById("btnRunFullSequence").addEventListener("click", () => {
+    if (demoTimer) clearTimeout(demoTimer);
+    clearLedger();
+
+    // Step 1: Standard 1 Lot Trade
+    updateStatus("🎬 <strong>Step 1 of 3:</strong> Submitting baseline 1-Lot trade...");
+    document.getElementById("orderQty").value = 1;
+    document.getElementById("brokerBuyBtn").click();
+
+    // Step 2: Rapid Turnaround 2 Lots
+    demoTimer = setTimeout(() => {
+      updateStatus("🎬 <strong>Step 2 of 3:</strong> Trader tilting after drawdown! Escalating to <strong>2 Lots (2.0x)</strong> in rapid turnaround (&lt;2.5s)...");
+      document.getElementById("orderQty").value = 2;
+      document.getElementById("brokerBuyBtn").click();
+
+      // Step 3: Hard Revenge Trade 4 Lots within 1.8s
+      demoTimer = setTimeout(() => {
+        updateStatus("🎬 <strong>Step 3 of 3:</strong> Severe Tilt! Escalating to <strong>4 Lots (2.0x)</strong> in 1.8s &rarr; <em>Watch ShieldFX ML Guard intercept execution!</em>");
+        document.getElementById("orderQty").value = 4;
+        document.getElementById("brokerBuyBtn").click();
+      }, 2000);
+
+    }, 2500);
+  });
+
+
+   // ─── CHECK PERSISTED COOLDOWN ON PAGE LOAD ──────────────────────────────────
+  function checkPersistedBrokerCooldown() {
+    const savedUntil = parseInt(localStorage.getItem("broker_demo_cooldown_until") || "0", 10);
+    if (savedUntil && Date.now() < savedUntil) {
+      const remainingSecs = Math.ceil((savedUntil - Date.now()) / 1000);
+      console.warn(`⏳ Resuming active broker cooldown: ${remainingSecs}s remaining`);
+      triggerStandaloneBlock(remainingSecs);
+    } else {
+      localStorage.removeItem("broker_demo_cooldown_until");
+    }
+  }
+
+  // ─── INIT ───────────────────────────────────────────────────────────────────
+  renderWatchlist();
+  initChart();
+  window.addEventListener('resize', drawChart);
+  // 🔒 Enforce cooldown on reload
+  checkPersistedBrokerCooldown();
+  
+</script>
+
+</body>
+</html>
