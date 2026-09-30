@@ -1,34 +1,77 @@
-# ⚡ ShieldFX — AI Behavioral Trading Guard & Revenge Shield
+# ⚡ ShieldFX — AI Behavioral Trading Risk Management System
 
-> **Real-time AI behavioral copilot that intercepts high-risk revenge trades, enforces cooldown periods, and protects retail trading capital across Zerodha, Groww, Binance, and web trading terminals.**
-
----
-
-## 🎯 Problem Statement
-Over **90% of retail traders lose capital** not from faulty strategies, but from psychological breakdown — emotional tilt, aggressive lot-size doubling, and rapid-fire revenge trading following drawdowns.
-
-## 🛡️ The ShieldFX Solution
-ShieldFX acts as an invisible, sub-10ms AI behavioral guard that intercepts orders before they hit the broker API. Using a trained **Random Forest Classifier**, it evaluates 5 core behavioral telemetry dimensions:
-1. **`time_delta_seconds`**: Turnaround speed since previous trade.
-2. **`lot_size_multiplier`**: Position sizing escalation relative to baseline.
-3. **`is_unhedged`**: Naked directional risk vs. hedged spread.
-4. **`loss_streak_count`**: Number of consecutive losing trades.
-5. **`recent_pnl_delta`**: Cumulative loss/drawdown magnitude.
+> **An AI-powered behavioral risk management system that detects potentially impulsive and revenge-trading behavior and provides real-time Allow, Warning, or Block interventions for retail traders.**
 
 ---
 
-## 🚀 Key Features & Architecture
-- 🧠 **FastAPI Machine Learning Service**: Micro-latency REST endpoint serving predictions in `< 10ms`.
-- 📈 **Trading Terminal & Simulator (`shieldfx_simulator.html`)**: High-DPI candlestick chart with **EMA 9**, **EMA 21**, **Bollinger Bands**, and **Volume Histogram**.
-- ⚡ **Multi-Broker Testbench (`broker_demo.html`)**: Interactive mock terminal supporting **Zerodha Kite**, **Groww Pro**, and **Binance Futures**.
-- 🧩 **Manifest V3 Chrome Extension**: Live browser extension injecting order interception, floating HUD, and a reload-proof 60-second cooldown lock.
+## 🎯 Problem
+
+Retail traders can make emotionally driven decisions after losses, such as:
+
+- Increasing position size after a loss
+- Taking trades too quickly
+- Continuing to trade during a losing streak
+- Taking unhedged positions
+- Trading despite increasing drawdown
+
+These behavioral patterns can increase trading risk.
 
 ---
 
-## 🛠️ Quick Start Guide
+## 🛡️ ShieldFX Solution
 
-### 1. Start the Machine Learning Backend
-```bash
-cd Backend
-pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
+ShieldFX focuses on **trader behavior rather than market-price prediction**.
+
+Before a trade is executed, ShieldFX analyzes recent behavioral signals and uses a trained **Random Forest Classifier** to estimate the probability of potentially risky or revenge-trading behavior.
+
+The decision engine then provides:
+
+| Risk Level | Action |
+|---|---|
+| 🟢 Low | **ALLOW** |
+| 🟡 Medium | **WARNING** |
+| 🔴 High | **BLOCK + COOLDOWN** |
+
+The goal is to provide a behavioral intervention before a potentially impulsive trade is executed.
+
+---
+
+## 🧠 Machine Learning Features
+
+The final Random Forest model uses **7 behavioral features**:
+
+1. `time_delta_seconds` — Time since the previous trade
+2. `lot_size_multiplier` — Change in lot size relative to the previous trade
+3. `position_size_change` — Change in position size
+4. `is_unhedged` — Whether the position is unhedged
+5. `loss_streak_count` — Number of consecutive losing trades
+6. `recent_pnl_delta` — Recent change in P&L
+7. `current_drawdown_pct` — Current drawdown percentage
+
+The model is trained to classify trading behavior as:
+
+- **Normal**
+- **Potential Revenge**
+
+---
+
+## 🏗️ Architecture
+
+```text
+Trader
+   ↓
+Chrome Extension
+   ↓
+Behavioral Feature Extraction
+   ↓
+FastAPI Backend
+   ↓
+Random Forest Model
+   ↓
+Behavioral Risk Probability
+   ↓
+Decision Engine
+   ↓
+┌─────────┬──────────┬─────────────────┐
+│  ALLOW  │ WARNING  │ BLOCK + COOLDOWN│
+└─────────┴──────────┴─────────────────┘
