@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShieldFX Settings & Configuration</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="brand">
+        <span class="logo">⚡</span>
+        <div>
+          <h1>SHIELDFX CONFIGURATION</h1>
+          <p>AI Behavioral Trading Copilot & Revenge Shield Settings</p>
+        </div>
+      </div>
+    </header>
+
+    <div class="settings-grid">
+      <!-- Backend Settings -->
+      <section class="panel">
+        <h2>ML Backend Connection</h2>
+        
+        <div class="form-group">
+          <label for="backendUrl">FastAPI Backend Endpoint</label>
+          <input type="text" id="backendUrl" placeholder="http://127.0.0.1:8000">
+          <span class="hint">The local or remote FastAPI server serving the trained Random Forest model (`/predict`).</span>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" id="btnTestBackend">Test Backend Connection</button>
+          <span class="status-msg" id="backendStatus"></span>
+        </div>
+      </section>
+
+      <!-- Cooldown & Guard Rules -->
+      <section class="panel">
+        <h2>Guardrail & Cooldown Parameters</h2>
+
+        <div class="form-group">
+          <label for="cooldownDuration">Lockdown Cooldown Duration</label>
+          <select id="cooldownDuration">
+            <option value="30">30 Seconds (Fast Reset)</option>
+            <option value="60" selected>60 Seconds (Standard Discipline Period)</option>
+            <option value="120">2 Minutes (Strict Guard)</option>
+            <option value="300">5 Minutes (Maximum Lockdown)</option>
+          </select>
+          <span class="hint">Enforced unskippable cooldown period when a HIGH-RISK revenge trade is blocked.</span>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <input type="checkbox" id="strictMode">
+          <label for="strictMode">
+            <strong>Strict Medium-Risk Intercept</strong>
+            <span class="hint">Require a 5-second deliberate confirmation modal on Medium-Risk advisory trades instead of a non-blocking toast.</span>
+          </label>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <input type="checkbox" id="autoIntercept" checked>
+          <label for="autoIntercept">
+            <strong>Real-Time DOM Capture & Interception</strong>
+            <span class="hint">Intercepts order clicks in real-time before broker network execution on Zerodha, Groww, Binance, etc.</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Supported Platforms Reference -->
+      <section class="panel full-width">
+        <h2>Supported Trading Platforms</h2>
+        <div class="platforms-list">
+          <div class="platform-item">
+            <span class="platform-tag zerodha">Zerodha Kite</span>
+            <span class="platform-url">kite.zerodha.com</span>
+          </div>
+          <div class="platform-item">
+            <span class="platform-tag groww">Groww</span>
+            <span class="platform-url">groww.in</span>
+          </div>
+          <div class="platform-item">
+            <span class="platform-tag binance">Binance</span>
+            <span class="platform-url">binance.com (Spot & Futures)</span>
+          </div>
+          <div class="platform-item">
+            <span class="platform-tag upstox">Upstox Pro</span>
+            <span class="platform-url">pro.upstox.com</span>
+          </div>
+          <div class="platform-item">
+            <span class="platform-tag angel">Angel One</span>
+            <span class="platform-url">trade.angelone.in</span>
+          </div>
+          <div class="platform-item">
+            <span class="platform-tag tv">TradingView</span>
+            <span class="platform-url">tradingview.com</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="footer-actions">
+      <button class="btn btn-primary" id="btnSave">Save Configuration</button>
+      <span class="save-msg" id="saveMsg"></span>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
